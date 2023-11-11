@@ -6,15 +6,15 @@ curl -o ./Kernel_De_Linux.tar.xz "https://cdn.kernel.org/pub/linux/kernel/v5.x/l
 tar -xJf Kernel_De_Linux.tar.xz -C ./
 
 #Creación de los archivos necesarios para las syscalls...
-mkdir ./linux-5.15.138/terejaker
-touch ./linux-5.15.138/terejaker/tere_syscall.c
+mkdir "./linux-5.15.138/$LOGNAME"
+touch "./linux-5.15.138/$LOGNAME/$LOGNAME"_syscall.c
 
 #Programa para realizar operaciones según una entrada...
-echo '
+echo "
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 
-SYSCALL_DEFINE3(teresyscall, char*, operation, int, num1, int, num2)
+SYSCALL_DEFINE3(${LOGNAME}syscall, char*, operation, int, num1, int, num2)
 {
     long result;
 
@@ -40,13 +40,26 @@ SYSCALL_DEFINE3(teresyscall, char*, operation, int, num1, int, num2)
 
     return result;
 }
-' >> ./linux-5.15.138/terejaker/tere_syscall.c
+" >> "./linux-5.15.138/$LOGNAME/$LOGNAME"_syscall.c
 
-echo 'obj-y := teresyscall.o' > ./linux-5.15.138/terejaker/Makefile
-echo 'teresyscall-y := tere_syscall.o' >> ./linux-5.15.138/terejaker/Makefile
+echo "obj-y := $LOGNAME"_syscall.o > "./linux-5.15.138/$LOGNAME/Makefile"
+echo "teresyscall-y := $LOGNAME"_syscall.o >> "./linux-5.15.138/$LOGNAME/Makefile"
 
-sed -i '1162s|$| terejaker/|' linux-5.15.138/Makefile
+sed -i "1162s|$| $LOGNAME/|" linux-5.15.138/Makefile
 
-sed -i '1384i asmlinkage long sys_teresyscall(char* operation,int num1, int num2);' ./linux-5.15.138/include/linux/syscalls.h
+sed -i "1384i asmlinkage long sys_$LOGNAME(char* operation,int num1, int num2);" ./linux-5.15.138/include/linux/syscalls.h
 
-echo '548 common teresyscall sys_teresyscall' >> ./linux-5.15.138/arch/x86/entry/syscalls/syscall_64.tbl
+echo "548 common ${LOGNAME}syscall sys_${LOGNAME}" >> ./linux-5.15.138/arch/x86/entry/syscalls/syscall_64.tbl
+
+
+## DESCOMENTAR PARA CONSTRUIR DEPENDENCIAS...
+# sudo yum install fedpkg
+#
+# fedpkg clone -a kernel
+#
+# sudo dnf builddep kernel/kernel.spec
+
+make -C linux-5.15.138 defconfig
+
+proc_number=$(nproc)
+make -j"$proc_number" -C linux-5.15.138 
