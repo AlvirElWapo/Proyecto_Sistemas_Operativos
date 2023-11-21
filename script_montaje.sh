@@ -17,7 +17,6 @@ echo "
 SYSCALL_DEFINE3(${LOGNAME}syscall, char*, operation, int, num1, int, num2)
 {
     long result;
-
     if (strcmp(operation, "suma") == 0) {
         result = num1 + num2;
     } else if (strcmp(operation, "resta") == 0) {
@@ -31,13 +30,8 @@ SYSCALL_DEFINE3(${LOGNAME}syscall, char*, operation, int, num1, int, num2)
         }
         result = num1 / num2;
     } else {
-        printk("Operacion INVALIDA. Operaciones permitidas: \n\" suma \"\n\" resta \"\n\" multiplicacion \"\n \"\n division \"\n");
         return -EINVAL;
     }
-
-    printk("RESULTADO EN EL KRB: %ld\n", result);
-    pr_info("RESULTADO EN CONSOLA: %ld\n", result);
-
     return result;
 }
 " >> "./linux-5.15.138/$LOGNAME/$LOGNAME"_syscall.c
